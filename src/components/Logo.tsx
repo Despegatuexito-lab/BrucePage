@@ -8,11 +8,11 @@ export default function Logo({ className = "" }: { className?: string }) {
       className={`flex items-center gap-2 shrink-0 ${className}`}
     >
       <Image
-        src="/logo-socios-importadores.jpg"
+        src="/logo-socios-importadores.png"
         alt="Socios Importadores"
-        width={160}
-        height={48}
-        className="h-9 w-auto rounded-md object-contain"
+        width={328}
+        height={144}
+        className="h-10 w-auto object-contain"
         priority
       />
     </Link>
