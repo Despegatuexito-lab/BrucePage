@@ -32,7 +32,7 @@ export default function InterviewRequestButton({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ studentId, message }),
     });
-    const data = await res.json();
+    const data = await res.json<{ error?: string }>();
     setLoading(false);
 
     if (!res.ok) {

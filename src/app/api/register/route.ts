@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { ROLES } from "@/lib/constants";
 
 const studentSchema = z.object({
@@ -22,7 +22,7 @@ const companySchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => null);
+  const body = await req.json<Record<string, unknown>>().catch(() => null);
   if (!body) {
     return NextResponse.json({ error: "Datos inválidos." }, { status: 400 });
   }
@@ -42,6 +42,7 @@ export async function POST(req: Request) {
   const data = parsed.data;
   const email = data.email.toLowerCase().trim();
 
+  const prisma = await getPrisma();
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return NextResponse.json(

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { saveUpload, deleteUpload, UploadError } from "@/lib/storage";
 import { ROLES } from "@/lib/constants";
 
@@ -11,6 +11,7 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 
+  const prisma = await getPrisma();
   const profile = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
   });
@@ -24,6 +25,7 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 
+  const prisma = await getPrisma();
   const profile = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
   });

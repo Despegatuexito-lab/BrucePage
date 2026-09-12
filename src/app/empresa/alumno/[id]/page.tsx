@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import Image from "next/image";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import InterviewRequestButton from "@/components/InterviewRequestButton";
 
 export default async function AlumnoDetallePage({
@@ -14,6 +14,7 @@ export default async function AlumnoDetallePage({
   if (!session || session.user.role !== "COMPANY") redirect("/login");
 
   const { id } = await params;
+  const prisma = await getPrisma();
   const student = await prisma.studentProfile.findUnique({ where: { id } });
   if (!student || !student.isPublished) notFound();
 

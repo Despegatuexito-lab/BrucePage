@@ -2,13 +2,14 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { REQUEST_STATUS_LABEL, RequestStatusType } from "@/lib/constants";
 
 export default async function EmpresaSolicitudesPage() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "COMPANY") redirect("/login");
 
+  const prisma = await getPrisma();
   const company = await prisma.companyProfile.findUnique({
     where: { userId: session.user.id },
   });

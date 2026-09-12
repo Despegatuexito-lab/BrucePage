@@ -30,7 +30,7 @@ export default function RegistroEstudiantePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ role: "STUDENT", ...form }),
     });
-    const data = await res.json();
+    const data = await res.json<{ error?: string }>();
 
     if (!res.ok) {
       setError(data.error || "No se pudo completar el registro.");

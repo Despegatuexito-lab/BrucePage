@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { ROLES } from "@/lib/constants";
 
 export async function GET(req: Request) {
@@ -13,6 +13,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q")?.trim();
 
+  const prisma = await getPrisma();
   const students = await prisma.studentProfile.findMany({
     where: {
       isPublished: true,

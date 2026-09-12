@@ -1,7 +1,15 @@
+// Fijado en Prisma 6.19.0: la 7.x compila su query-compiler a WASM en
+// runtime (`new WebAssembly.Module(bytes)`), algo que Cloudflare Workers
+// bloquea por seguridad ("Wasm code generation disallowed by embedder").
+// La 6.19.0 usa el motor WASM clásico (import estático), compatible con
+// workerd. Ver https://github.com/prisma/prisma/issues/28657
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
+// El driver adapter (D1 en Cloudflare, ver src/lib/prisma.ts) maneja la
+// conexión real; este `url` solo satisface la validación del schema.
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")

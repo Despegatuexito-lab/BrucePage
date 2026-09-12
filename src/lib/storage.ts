@@ -1,8 +1,5 @@
-import { mkdir, writeFile, unlink } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
-
-const UPLOADS_ROOT = path.join(process.cwd(), "public", "uploads");
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export type UploadKind = "photos" | "cvs" | "videos";
 
@@ -23,6 +20,13 @@ const LIMITS: Record<UploadKind, { maxBytes: number; types: string[] }> = {
 
 export class UploadError extends Error {}
 
+async function getBucket() {
+  const { env } = await getCloudflareContext({ async: true });
+  return env.UPLOADS;
+}
+
+// Los archivos se guardan en R2 con esta key; se sirven de vuelta a través
+// de /api/files/[...key], que hace streaming desde el bucket.
 export async function saveUpload(
   file: File,
   kind: UploadKind
@@ -42,27 +46,31 @@ export async function saveUpload(
     );
   }
 
-  const dir = path.join(UPLOADS_ROOT, kind);
-  await mkdir(dir, { recursive: true });
+  const ext = extname(file.name) || guessExtension(file.type);
+  const key = `${kind}/${randomUUID()}${ext}`;
 
-  const ext = path.extname(file.name) || guessExtension(file.type);
-  const filename = `${randomUUID()}${ext}`;
-  const filePath = path.join(dir, filename);
+  const bucket = await getBucket();
+  await bucket.put(key, await file.arrayBuffer(), {
+    httpMetadata: { contentType: file.type },
+  });
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filePath, buffer);
-
-  return `/uploads/${kind}/${filename}`;
+  return `/api/files/${key}`;
 }
 
 export async function deleteUpload(publicUrl: string | null | undefined) {
-  if (!publicUrl || !publicUrl.startsWith("/uploads/")) return;
-  const filePath = path.join(process.cwd(), "public", publicUrl);
+  if (!publicUrl || !publicUrl.startsWith("/api/files/")) return;
+  const key = publicUrl.replace("/api/files/", "");
+  const bucket = await getBucket();
   try {
-    await unlink(filePath);
+    await bucket.delete(key);
   } catch {
     // El archivo ya no existe; no es un error del flujo principal.
   }
+}
+
+function extname(filename: string): string {
+  const match = /\.[^./\\]+$/.exec(filename);
+  return match ? match[0] : "";
 }
 
 function guessExtension(mime: string): string {

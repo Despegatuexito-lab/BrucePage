@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { ROLES } from "@/lib/constants";
 
 export async function GET() {
@@ -9,6 +9,8 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
+
+  const prisma = await getPrisma();
 
   if (session.user.role === ROLES.COMPANY) {
     const company = await prisma.companyProfile.findUnique({
@@ -47,7 +49,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body = await req.json<any>().catch(() => null);
   const studentId = body?.studentId?.toString();
   const message = body?.message?.toString() || null;
 
@@ -58,6 +61,7 @@ export async function POST(req: Request) {
     );
   }
 
+  const prisma = await getPrisma();
   const company = await prisma.companyProfile.findUnique({
     where: { userId: session.user.id },
   });

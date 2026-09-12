@@ -83,7 +83,10 @@ export default function StudentProfileForm({
       method: "PUT",
       body: fd,
     });
-    const data = await res.json();
+    const data = await res.json<{
+      error?: string;
+      profile?: { photoUrl: string | null; cvUrl: string | null; videoUrl: string | null };
+    }>();
     setSaving(false);
 
     if (!res.ok) {
@@ -94,9 +97,9 @@ export default function StudentProfileForm({
     setMessage({ type: "ok", text: "Perfil actualizado correctamente." });
     setForm((f) => ({
       ...f,
-      photoUrl: data.profile.photoUrl,
-      cvUrl: data.profile.cvUrl,
-      videoUrl: data.profile.videoUrl,
+      photoUrl: data.profile?.photoUrl ?? f.photoUrl,
+      cvUrl: data.profile?.cvUrl ?? f.cvUrl,
+      videoUrl: data.profile?.videoUrl ?? f.videoUrl,
     }));
     router.refresh();
   }

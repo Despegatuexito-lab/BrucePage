@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { ROLES, REQUEST_STATUS } from "@/lib/constants";
 
 export async function PATCH(
@@ -14,7 +14,8 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await req.json().catch(() => null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body = await req.json<any>().catch(() => null);
   const status = body?.status;
 
   if (
@@ -24,6 +25,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Estado inválido." }, { status: 400 });
   }
 
+  const prisma = await getPrisma();
   const student = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
   });

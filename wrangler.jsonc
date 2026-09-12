@@ -1,0 +1,44 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "socios-importadores-app",
+	"compatibility_date": "2026-09-11",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"d1_databases": [
+		{
+			// Crea la base con: npx wrangler d1 create socios-importadores-db
+			// y reemplaza database_id con el ID que te entregue ese comando.
+			"binding": "DB",
+			"database_name": "socios-importadores-db",
+			"database_id": "REEMPLAZA_CON_TU_DATABASE_ID",
+			"migrations_dir": "migrations"
+		}
+	],
+	"r2_buckets": [
+		{
+			// Crea el bucket con: npx wrangler r2 bucket create socios-importadores-uploads
+			"binding": "UPLOADS",
+			"bucket_name": "socios-importadores-uploads"
+		}
+	],
+	"services": [
+		{
+			// Self-reference service binding, the service name must match the worker name
+			// see https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "socios-importadores-app"
+		}
+	],
+	"images": {
+		// Enable image optimization
+		// see https://opennext.js.org/cloudflare/howtos/image
+		"binding": "IMAGES"
+	}
+}

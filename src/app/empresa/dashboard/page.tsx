@@ -17,7 +17,7 @@ export default function EmpresaDashboardPage() {
           `/api/students?q=${encodeURIComponent(query)}`,
           { signal: controller.signal }
         );
-        const data = await res.json();
+        const data = await res.json<{ students?: StudentCardData[] }>();
         setStudents(data.students || []);
       } finally {
         setLoading(false);

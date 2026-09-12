@@ -1,13 +1,14 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import StudentProfileForm from "@/components/StudentProfileForm";
 
 export default async function EstudianteDashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "STUDENT") redirect("/login");
 
+  const prisma = await getPrisma();
   const profile = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
   });
